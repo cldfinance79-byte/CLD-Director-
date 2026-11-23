@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLD DIRECTOR — Panneau Directeur</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 16px 16px 84px 16px;
+      background: #080c14;
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .container {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .card {
+      width: 100%;
+      background: #121928;
+      border: 1px solid #22304a;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    h2, h3 {
+      margin: 0 0 10px 0;
+      color: #f3ba2f;
+    }
+    h2 {
+      font-size: 20px;
+    }
+    h3 {
+      font-size: 16px;
+    }
+    p.desc {
+      font-size: 13px;
+      color: #9aa5b1;
+      margin: 0 0 12px 0;
+      line-height: 1.45;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: #cbd2d9;
+      margin-bottom: 5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #22304a;
+      background: #080c14;
+      color: #ffffff;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 520px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+    .btn-gold {
+      width: 100%;
+      background: #f3ba2f;
+      color: #080c14;
+      border: none;
+      padding: 11px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-green {
+      background: #00d084;
+      color: #080c14;
+      border: none;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-red {
+      background: #ff4d4f;
+      color: #ffffff;
+      border: none;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-outline {
+      background: #182236;
+      color: #f3ba2f;
+      border: 1px solid #2b3c5d;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .item-box {
+      background: #080c14;
+      border: 1px solid #22304a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      background: #22304a;
+      color: #f3ba2f;
+    }
+    .badge-ok {
+      background: #09241a;
+      color: #00d084;
+      border: 1px solid #00d084;
+    }
+    .badge-err {
+      background: #2b1115;
+      color: #ff6b6b;
+      border: 1px solid #ff6b6b;
+    }
+    .status-msg {
+      margin-top: 8px;
+      font-size: 13px;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #121928;
+      border-top: 1px solid #22304a;
+      display: flex;
+      justify-content: center;
+      z-index: 999;
+    }
+    .bottom-nav-inner {
+      width: 100%;
+      max-width: 640px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 4px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: #9aa5b1;
+      padding: 8px 4px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .nav-btn.active {
+      background: #1c2840;
+      color: #f3ba2f;
+    }
+  </style>
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0;">👑 CLD DIRECTOR</h2>
+        <span class="badge badge-ok" id="db-status-badge">Firebase prêt</span>
+      </div>
+      <p class="desc" style="margin-top:6px; margin-bottom:0;">
+        Contrôle en temps réel de <strong>CLD FINANCE</strong> : prix VIP (dès 5 $), mots de passe clients, adresses BNB de retrait et validation TXID.
+      </p>
+    </div>
+
+    <!-- 1. DÉPÔTS À VALIDER AVEC TXID -->
+    <div id="dir-section-deposits">
+      <div class="card">
+        <h3>📥 Validation des Dépôts & Envoi TXID au Client</h3>
+        <p class="desc">
+          Validez le dépôt d'un client avec le <strong>TXID de confirmation</strong>. Ce TXID est envoyé uniquement sur le compte du client concerné.
+        </p>
+        <div id="deposits-list">Chargement des dépôts...</div>
+      </div>
+    </div>
+
+    <!-- 2. RÉGLAGES & PRIX VIP MODIFIABLES À VOLONTÉ -->
+    <div id="dir-section-settings" class="hidden">
+      <div class="card">
+        <h3>⚙️ Paramètres Plateforme (Temps Réel)</h3>
+        <p class="desc">Toute modification enregistrée ici s'applique immédiatement chez tous les clients.</p>
+
+        <div class="grid-2">
+          <div>
+            <label for="set-bonus-pct">Bonus dépôt (%)</label>
+            <input type="number" id="set-bonus-pct" min="0" step="any" value="25" />
+          </div>
+          <div>
+            <label for="set-ref-pct">Commission parrainage (%)</label>
+            <input type="number" id="set-ref-pct" min="0" step="any" value="10" />
+          </div>
+        </div>
+
+        <label for="set-support-email">E-mail Service Client</label>
+        <input type="email" id="set-support-email" value="cldfinance79@gmail.com" />
+
+        <label for="set-platform-bnb">Adresse BNB (BEP20) de dépôt</label>
+        <input type="text" id="set-platform-bnb" placeholder="0x..." />
+
+        <button class="btn-gold" onclick="savePlatformSettings()">Enregistrer et synchroniser</button>
+        <div id="settings-save-status" class="status-msg"></div>
+      </div>
+
+      <div class="card">
+        <h3>💎 Prix & Gains des Packs VIP (modifiable quand vous voulez)</h3>
+        <p class="desc">Modifiez le prix (dépôt minimum dès 5 $) et le gain journalier de chaque pack VIP à tout moment.</p>
+
+        <div id="vip-editor-list"></div>
+
+        <div class="item-box" style="margin-top:12px;">
+          <strong style="color:#f3ba2f;">+ Ajouter un nouveau Pack VIP</strong>
+          <div class="grid-2" style="margin-top:8px;">
+            <div>
+              <label for="new-vip-name">Nom du VIP</label>
+              <input type="text" id="new-vip-name" placeholder="Ex: VIP 5" />
+            </div>
+            <div>
+              <label for="new-vip-min">Prix / Dépôt min ($ ≥ 5)</label>
+              <input type="number" id="new-vip-min" min="5" step="any" placeholder="Ex: 300" />
+            </div>
+          </div>
+          <label for="new-vip-gain">Gain journalier ($)</label>
+          <input type="number" id="new-vip-gain" min="0" step="any" placeholder="Ex: 50" />
+          <button class="btn-outline" onclick="addVipPlan()">Ajouter ce Pack VIP</button>
+        </div>
+
+        <button class="btn-gold" style="margin-top:10px;" onclick="saveVipPlans()">Enregistrer tous les prix VIP</button>
+        <div id="vip-save-status" class="status-msg"></div>
+      </div>
+    </div>
+
+    <!-- 3. RETRAITS BNB (BEP20) -->
+    <div id="dir-section-withdrawals" class="hidden">
+      <div class="card">
+        <h3>💸 Demandes de Retrait BNB (BEP20)</h3>
+        <p class="desc">Approuvez ou rejetez les retraits demandés par les membres.</p>
+        <div id="withdrawals-list">Chargement des retraits...</div>
+      </div>
+    </div>
+
+    <!-- 4. MEMBRES : MOT DE PASSE OUBLIÉ, ADRESSE BNB, VIP & SOLDE -->
+    <div id="dir-section-users" class="hidden">
+      <div class="card">
+        <h3>👥 Gestion des Membres (Mot de passe, BNB, VIP)</h3>
+        <p class="desc">
+          Réinitialisez un mot de passe oublié, modifiez ou réinitialisez l'adresse BNB de retrait d'un client, et mettez à jour son VIP ou son solde.
+        </p>
+
+        <label for="search-user-input">Rechercher un membre (nom, e-mail ou UID)</label>
+        <input type="text" id="search-user-input" placeholder="Filtrer la liste des membres..." oninput="renderUsersList()" />
+
+        <div id="users-list">Chargement des membres...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button id="dnav-deposits" class="nav-btn active" onclick="switchDirTab('deposits')">Dépôts</button>
+      <button id="dnav-settings" class="nav-btn" onclick="switchDirTab('settings')">Réglages VIP</button>
+      <button id="dnav-withdrawals" class="nav-btn" onclick="switchDirTab('withdrawals')">Retraits BNB</button>
+      <button id="dnav-users" class="nav-btn" onclick="switchDirTab('users')">Membres</button>
+    </div>
+  </nav>
+
+  <script>
+    const FIREBASE_CONFIG = {
+      apiKey: "VOTRE_API_KEY",
+      authDomain: "VOTRE_PROJET.firebaseapp.com",
+      databaseURL: "https://VOTRE_PROJET-default-rtdb.firebaseio.com",
+      projectId: "VOTRE_PROJET",
+      storageBucket: "VOTRE_PROJET.appspot.com",
+      messagingSenderId: "VOTRE_SENDER_ID",
+      appId: "VOTRE_APP_ID"
+    };
+
+    let db = null;
+    if (FIREBASE_CONFIG.apiKey !== "VOTRE_API_KEY") {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(FIREBASE_CONFIG);
+      }
+      db = firebase.database();
+      document.getElementById("db-status-badge").textContent = "Connecté";
+    } else {
+      document.getElementById("db-status-badge").textContent = "Clés à configurer";
+      document.getElementById("db-status-badge").className = "badge badge-err";
+    }
+
+    let currentSettings = {
+      depositBonusPercent: 25,
+      referralPercent: 10,
+      supportEmail: "cldfinance79@gmail.com",
+      platformBnbAddress: "0x0000000000000000000000000000000000000000",
+      vipPlans: {
+        "VIP 1": { minDeposit: 5, dailyGain: 0.75 },
+        "VIP 2": { minDeposit: 15, dailyGain: 2.25 },
+        "VIP 3": { minDeposit: 50, dailyGain: 8.00 },
+        "VIP 4": { minDeposit: 150, dailyGain: 25.00 }
+      }
+    };
+
+    let allUsers = {};
+    let allDeposits = {};
+    let allWithdrawals = {};
+
+    function switchDirTab(tab) {
+      ["deposits", "settings", "withdrawals", "users"].forEach((t) => {
+        document.getElementById("dir-section-" + t).classList.toggle("hidden", t !== tab);
+        document.getElementById("dnav-" + t).classList.toggle("active", t === tab);
+      });
+      window.scrollTo(0, 0);
+    }
+
+    function fillSettingsForm() {
+      document.getElementById("set-bonus-pct").value = currentSettings.depositBonusPercent ?? 25;
+      document.getElementById("set-ref-pct").value = currentSettings.referralPercent ?? 10;
+      document.getElementById("set-support-email").value = currentSettings.supportEmail || "cldfinance79@gmail.com";
+      document.getElementById("set-platform-bnb").value = currentSettings.platformBnbAddress || "";
+      renderVipEditor();
+    }
+
+    function renderVipEditor() {
+      const container = document.getElementById("vip-editor-list");
+      const plans = currentSettings.vipPlans || {};
+      const keys = Object.keys(plans);
+
+      if (!keys.length) {
+        container.innerHTML = `<p class="desc">Aucun pack VIP configuré.</p>`;
+        return;
+      }
+
+      container.innerHTML = keys.map((vipName, idx) => {
+        const p = plans[vipName] || {};
+        const minDep = Math.max(5, Number(p.minDeposit || 5));
+        const gain = Number(p.dailyGain || 0);
+        const safeId = encodeURIComponent(vipName).replace(/%/g, "_") + "_" + idx;
+
+        return `
+          <div class="item-box" data-vip-key="${vipName}">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong style="color:#f3ba2f;">${vipName}</strong>
+              <button class="btn-red" style="padding:5px 9px; font-size:11px;" onclick="removeVipPlan('${vipName.replace(/'/g, "\\'")}')">Supprimer</button>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label>Prix / Dépôt min ($ ≥ 5)</label>
+                <input type="number" min="5" step="any" class="vip-min-input" value="${minDep}" />
+              </div>
+              <div>
+                <label>Gain journalier ($)</label>
+                <input type="number" min="0" step="any" class="vip-gain-input" value="${gain}" />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function addVipPlan() {
+      const name = document.getElementById("new-vip-name").value.trim();
+      const minDep = Math.max(5, parseFloat(document.getElementById("new-vip-min").value) || 5);
+      const gain = parseFloat(document.getElementById("new-vip-gain").value) || 0;
+
+      if (!name) {
+        alert("Entrez un nom pour le nouveau Pack VIP (ex: VIP 5).");
+        return;
+      }
+
+      currentSettings.vipPlans = currentSettings.vipPlans || {};
+      currentSettings.vipPlans[name] = { minDeposit: minDep, dailyGain: gain };
+      document.getElementById("new-vip-name").value = "";
+      document.getElementById("new-vip-min").value = "";
+      document.getElementById("new-vip-gain").value = "";
+      renderVipEditor();
+    }
+
+    function removeVipPlan(vipName) {
+      if (!currentSettings.vipPlans || !currentSettings.vipPlans[vipName]) return;
+      delete currentSettings.vipPlans[vipName];
+      renderVipEditor();
+    }
+
+    function savePlatformSettings() {
+      const bonusPct = parseFloat(document.getElementById("set-bonus-pct").value) || 0;
+      const refPct = parseFloat(document.getElementById("set-ref-pct").value) || 0;
+      const supportEmail = document.getElementById("set-support-email").value.trim() || "cldfinance79@gmail.com";
+      const platformBnbAddress = document.getElementById("set-platform-bnb").value.trim();
+      const statusEl = document.getElementById("settings-save-status");
+
+      if (!db) {
+        statusEl.style.color = "#ff6b6b";
+        statusEl.textContent = "Configurez d'abord FIREBASE_CONFIG.";
+        return;
+      }
+
+      db.ref("settings/platform").update({
+        depositBonusPercent: bonusPct,
+        referralPercent: refPct,
+        supportEmail,
+        platformBnbAddress
+      }).then(() => {
+        statusEl.style.color = "#00d084";
+        statusEl.textContent = "Paramètres enregistrés et synchronisés chez les clients.";
+      });
+    }
+
+    function saveVipPlans() {
+      const statusEl = document.getElementById("vip-save-status");
+      if (!db) {
+        statusEl.style.color = "#ff6b6b";
+        statusEl.textContent = "Configurez d'abord FIREBASE_CONFIG.";
+        return;
+      }
+
+      const updatedPlans = {};
+      document.querySelectorAll("#vip-editor-list .item-box").forEach((box) => {
+        const key = box.getAttribute("data-vip-key");
+        const minVal = Math.max(5, parseFloat(box.querySelector(".vip-min-input").value) || 5);
+        const gainVal = parseFloat(box.querySelector(".vip-gain-input").value) || 0;
+        if (key) {
+          updatedPlans[key] = { minDeposit: minVal, dailyGain: gainVal };
+        }
+      });
+
+      db.ref("settings/platform/vipPlans").set(updatedPlans).then(() => {
+        currentSettings.vipPlans = updatedPlans;
+        statusEl.style.color = "#00d084";
+        statusEl.textContent = "Prix et gains VIP mis à jour en temps réel chez les clients.";
+      });
+    }
+
+    function renderDepositsList() {
+      const container = document.getElementById("deposits-list");
+      const entries = Object.entries(allDeposits || {}).reverse();
+      if (!entries.length) {
+        container.innerHTML = `<p class="desc">Aucune demande de dépôt pour le moment.</p>`;
+        return;
+      }
+
+      const vipKeys = Object.keys(currentSettings.vipPlans || { "VIP 1": {}, "VIP 2": {}, "VIP 3": {}, "VIP 4": {} });
+
+      container.innerHTML = entries.map(([depId, d]) => {
+        const isConf = d.status === "confirmed";
+        const badgeClass = isConf ? "badge badge-ok" : "badge";
+        const badgeText = isConf ? "Confirmé" : "En attente";
+        const suggestedTotal = Number(d.totalWithBonus || d.amount || 0).toFixed(2);
+        const suggestedTxid = d.confirmTxid || d.clientTxid || "";
+
+        const optionsHtml = vipKeys.map((vk) =>
+          `<option value="${vk}" ${(d.vipRequested === vk) ? "selected" : ""}>${vk}</option>`
+        ).join("");
+
+        return `
+          <div class="item-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong>${d.memberName || "Membre"} (${d.memberEmail || ""})</strong>
+              <span class="${badgeClass}">${badgeText}</span>
+            </div>
+            <div>Client destinataire (UID) : <code>${d.uid || ""}</code></div>
+            <div>Pack demandé : <strong style="color:#f3ba2f;">${d.vipRequested || "VIP 1"}</strong> | Montant : <strong>${Number(d.amount || 0).toFixed(2)} $</strong> (Total estimé avec bonus : <strong style="color:#00d084;">${suggestedTotal} $</strong>)</div>
+            <div>TXID soumis par le client : <strong style="color:#f3ba2f; word-break:break-all;">${d.clientTxid || "—"}</strong></div>
+            ${d.referredBy ? `<div>Parrain : <code>${d.referredBy}</code> (Commission estimée : <strong>${Number(d.referralCommissionEstimate || 0).toFixed(2)} $</strong>)</div>` : ""}
+
+            <div style="margin-top:10px;">
+              <label>TXID de confirmation à envoyer uniquement à ce client</label>
+              <input type="text" id="txid-input-${depId}" value="${suggestedTxid}" placeholder="Entrez le TXID confirmé" />
+
+              <div class="grid-2">
+                <div>
+                  <label>Pack VIP activé</label>
+                  <select id="vip-input-${depId}">${optionsHtml}</select>
+                </div>
+                <div>
+                  <label>Montant total à créditer ($)</label>
+                  <input type="number" step="any" id="credit-input-${depId}" value="${suggestedTotal}" />
+                </div>
+              </div>
+
+              <div style="display:flex; gap:8px;">
+                <button class="btn-green" style="flex:1;" onclick="confirmDepositWithTxid('${depId}')">✅ Valider & Envoyer TXID à ce client</button>
+                <button class="btn-red" onclick="rejectDeposit('${depId}')">Rejeter</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function confirmDepositWithTxid(depId) {
+      if (!db) return;
+      const d = allDeposits[depId];
+      if (!d || !d.uid) {
+        alert("Client introuvable pour cette demande de dépôt.");
+        return;
+      }
+
+      const confirmTxid = document.getElementById("txid-input-" + depId).value.trim();
+      const vipLevel = document.getElementById("vip-input-" + depId).value;
+      const creditAmount = parseFloat(document.getElementById("credit-input-" + depId).value) || 0;
+
+      if (!confirmTxid || confirmTxid.length < 6) {
+        alert("Veuillez saisir un TXID de confirmation valide avant de valider.");
+        return;
+      }
+
+      db.ref("deposits/" + depId).update({
+        status: "confirmed",
+        confirmTxid,
+        vipActivated: vipLevel,
+        creditedAmount: creditAmount,
+        confirmedAt: Date.now()
+      });
+
+      const userRef = db.ref("users/" + d.uid);
+      userRef.get().then((snap) => {
+        const prevBal = snap.exists() ? (parseFloat(snap.val().balance) || 0) : 0;
+        const nextBal = Number((prevBal + creditAmount).toFixed(2));
+        userRef.update({
+          vip: vipLevel,
+          depositConfirmed: true,
+          depositStatus: "confirmed",
+          confirmTxid,
+          balance: nextBal
+        });
+        userRef.child("confirmedTxids/" + depId).set({
+          depositId: depId,
+          txid: confirmTxid,
+          vip: vipLevel,
+          creditedAmount: creditAmount,
+          confirmedAt: Date.now()
+        });
+      });
+
+      if (d.referredBy && !d.referralPaid) {
+        const refComm = Number(d.referralCommissionEstimate || 0);
+        if (refComm > 0) {
+          const parrainRef = db.ref("users/" + d.referredBy);
+          parrainRef.get().then((pSnap) => {
+            if (pSnap.exists()) {
+              const pData = pSnap.val();
+              parrainRef.update({
+                balance: Number(((parseFloat(pData.balance) || 0) + refComm).toFixed(2)),
+                referralEarnings: Number(((parseFloat(pData.referralEarnings) || 0) + refComm).toFixed(2))
+              });
+              db.ref("deposits/" + depId).update({ referralPaid: true });
+            }
+          });
+        }
+      }
+
+      alert(`Dépôt confirmé et TXID envoyé au compte de ${d.memberName || d.uid} !`);
+    }
+
+    function rejectDeposit(depId) {
+      if (!db) return;
+      const d = allDeposits[depId];
+      db.ref("deposits/" + depId).update({
+        status: "rejected",
+        rejectedAt: Date.now()
+      });
+      if (d && d.uid) {
+        db.ref("users/" + d.uid).update({
+          depositConfirmed: false,
+          depositStatus: "rejected"
+        });
+      }
+    }
+
+    function renderWithdrawalsList() {
+      const container = document.getElementById("withdrawals-list");
+      const entries = Object.entries(allWithdrawals || {}).reverse();
+      if (!entries.length) {
+        container.innerHTML = `<p class="desc">Aucune demande de retrait BNB pour le moment.</p>`;
+        return;
+      }
+
+      container.innerHTML = entries.map(([wId, w]) => {
+        const isApproved = w.status === "approved";
+        const isRejected = w.status === "rejected";
+        const badgeClass = isApproved ? "badge badge-ok" : (isRejected ? "badge badge-err" : "badge");
+        const badgeText = isApproved ? "Payé / Approuvé" : (isRejected ? "Rejeté" : "En attente");
+
+        return `
+          <div class="item-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong>${w.memberName || "Membre"} (${w.memberEmail || ""})</strong>
+              <span class="${badgeClass}">${badgeText}</span>
+            </div>
+            <div>Montant : <strong style="color:#00d084;">${Number(w.amount || 0).toFixed(2)} $</strong> | Réseau : <strong>${w.network || "BNB_BEP20"}</strong></div>
+            <div>Adresse BNB : <strong style="color:#f3ba2f; word-break:break-all;">${w.bnbAddress || ""}</strong></div>
+            ${(!isApproved && !isRejected) ? `
+              <div style="display:flex; gap:8px; margin-top:10px;">
+                <button class="btn-green" style="flex:1;" onclick="approveWithdrawal('${wId}')">Approuver le retrait</button>
+                <button class="btn-red" onclick="rejectWithdrawal('${wId}')">Rejeter</button>
+              </div>
+            ` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function approveWithdrawal(wId) {
+      if (!db) return;
+      const w = allWithdrawals[wId];
+      if (!w) return;
+
+      db.ref("withdrawals/" + wId).update({
+        status: "approved",
+        processedAt: Date.now()
+      });
+
+      if (w.uid) {
+        const uRef = db.ref("users/" + w.uid);
+        uRef.get().then((snap) => {
+          if (snap.exists()) {
+            const bal = parseFloat(snap.val().balance) || 0;
+            const amt = parseFloat(w.amount) || 0;
+            uRef.update({ balance: Math.max(0, Number((bal - amt).toFixed(2))) });
+          }
+        });
+      }
+    }
+
+    function rejectWithdrawal(wId) {
+      if (!db) return;
+      db.ref("withdrawals/" + wId).update({
+        status: "rejected",
+        processedAt: Date.now()
+      });
+    }
+
+    function renderUsersList() {
+      const container = document.getElementById("users-list");
+      const q = (document.getElementById("search-user-input")?.value || "").trim().toLowerCase();
+      const vipKeys = Object.keys(currentSettings.vipPlans || { "VIP 1": {}, "VIP 2": {}, "VIP 3": {}, "VIP 4": {} });
+
+      const entries = Object.entries(allUsers || {}).filter(([uid, u]) => {
+        if (!q) return true;
+        return (
+          uid.toLowerCase().includes(q) ||
+          (u.name || "").toLowerCase().includes(q) ||
+          (u.email || "").toLowerCase().includes(q)
+        );
+      });
+
+      if (!entries.length) {
+        container.innerHTML = `<p class="desc">Aucun membre trouvé.</p>`;
+        return;
+      }
+
+      container.innerHTML = entries.map(([uid, u]) => {
+        const vipOptions = [`<option value="" ${!u.vip ? "selected" : ""}>Aucun</option>`]
+          .concat(vipKeys.map((vk) => `<option value="${vk}" ${u.vip === vk ? "selected" : ""}>${vk}</option>`))
+          .join("");
+
+        return `
+          <div class="item-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong>${u.name || "Membre"} (${u.email || ""})</strong>
+              <span class="badge ${u.depositConfirmed ? "badge-ok" : ""}">${u.vip || "Sans VIP"}</span>
+            </div>
+            <div>UID : <code>${uid}</code></div>
+            <div>Solde actuel : <strong style="color:#00d084;">${Number(u.balance || 0).toFixed(2)} $</strong> | Filleuls : <strong>${u.referralsCount || 0}</strong></div>
+            <div>Mot de passe actuel : <code>${u.password || "Non défini"}</code></div>
+            <div>Adresse BNB retrait actuelle : <strong style="color:#f3ba2f; word-break:break-all;">${u.defaultBnb || "Aucune"}</strong></div>
+            <div>TXID confirmé : <strong style="color:#00d084; word-break:break-all;">${u.confirmTxid || "Aucun"}</strong></div>
+
+            <div class="grid-2" style="margin-top:10px;">
+              <div>
+                <label>Niveau VIP</label>
+                <select id="u-vip-${uid}">${vipOptions}</select>
+              </div>
+              <div>
+                <label>Solde ($)</label>
+                <input type="number" step="any" id="u-bal-${uid}" value="${Number(u.balance || 0).toFixed(2)}" />
+              </div>
+            </div>
+
+            <label>Nouveau mot de passe (mot de passe oublié)</label>
+            <input type="text" id="u-pass-${uid}" value="${u.password || ""}" placeholder="Nouveau mot de passe (min. 4 car.)" />
+
+            <label>Adresse BNB (BEP20) de retrait du client</label>
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+              <input type="text" id="u-bnb-${uid}" style="margin-bottom:0; flex:1;" value="${u.defaultBnb || ""}" placeholder="0x..." />
+              <button class="btn-outline" onclick="resetUserBnb('${uid}')">Réinitialiser BNB</button>
+            </div>
+
+            <label>TXID de confirmation de ce membre</label>
+            <input type="text" id="u-txid-${uid}" value="${u.confirmTxid || ""}" placeholder="TXID..." />
+
+            <button class="btn-gold" onclick="updateSingleUser('${uid}')">Sauvegarder ce membre</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function resetUserBnb(uid) {
+      if (!db) return;
+      const inputEl = document.getElementById("u-bnb-" + uid);
+      if (inputEl) inputEl.value = "";
+      db.ref("users/" + uid).update({ defaultBnb: "" }).then(() => {
+        alert("Adresse BNB de retrait réinitialisée pour ce client.");
+      });
+    }
+
+    function updateSingleUser(uid) {
+      if (!db) return;
+      const vip = document.getElementById("u-vip-" + uid).value;
+      const balance = parseFloat(document.getElementById("u-bal-" + uid).value) || 0;
+      const newPass = document.getElementById("u-pass-" + uid).value.trim();
+      const bnbAddr = document.getElementById("u-bnb-" + uid).value.trim();
+      const confirmTxid = document.getElementById("u-txid-" + uid).value.trim();
+      const confirmed = Boolean(vip && confirmTxid.length >= 6);
+
+      if (newPass && newPass.length < 4) {
+        alert("Le mot de passe doit contenir au moins 4 caractères.");
+        return;
+      }
+      if (bnbAddr && (!bnbAddr.startsWith("0x") || bnbAddr.length < 20)) {
+        alert("Adresse BNB invalide (doit commencer par 0x).");
+        return;
+      }
+
+      const updates = {
+        vip,
+        balance: Number(balance.toFixed(2)),
+        defaultBnb: bnbAddr,
+        confirmTxid,
+        depositConfirmed: confirmed,
+        depositStatus: confirmed ? "confirmed" : "pending"
+      };
+      if (newPass) {
+        updates.password = newPass;
+      }
+
+      db.ref("users/" + uid).update(updates).then(() => {
+        alert("Informations du membre mises à jour !");
+      });
+    }
+
+    function startListeners() {
+      if (!db) return;
+
+      db.ref("settings/platform").on("value", (snap) => {
+        if (snap.exists()) {
+          currentSettings = {
+            ...currentSettings,
+            ...snap.val(),
+            vipPlans: snap.val().vipPlans || currentSettings.vipPlans
+          };
+          fillSettingsForm();
+          renderDepositsList();
+          renderUsersList();
+        }
+      });
+
+      db.ref("deposits").on("value", (snap) => {
+        allDeposits = snap.exists() ? snap.val() : {};
+        renderDepositsList();
+      });
+
+      db.ref("withdrawals").on("value", (snap) => {
+        allWithdrawals = snap.exists() ? snap.val() : {};
+        renderWithdrawalsList();
+      });
+
+      db.ref("users").on("value", (snap) => {
+        allUsers = snap.exists() ? snap.val() : {};
+        renderUsersList();
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fillSettingsForm();
+      startListeners();
+    });
+  </script>
+</body>
+</html>
