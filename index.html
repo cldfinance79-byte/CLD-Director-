@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLD_Director</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 16px 16px 40px 16px;
+      background: #070b12;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+      width: 100%;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #f3ba2f;
+      letter-spacing: 0.3px;
+    }
+    .status-pill {
+      background: #07291e;
+      border: 1px solid #0e6b4a;
+      color: #10d990;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .status-pill.offline {
+      background: #2b1115;
+      border-color: #8c2d38;
+      color: #ff6b6b;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: #101724;
+      border: 1px solid #1d283d;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: #9aa7b8;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 21px;
+      font-weight: 800;
+      color: #f3ba2f;
+    }
+    .tabs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .tab-btn {
+      background: #131b2b;
+      border: 1px solid #1f2b42;
+      color: #b8c4d4;
+      padding: 11px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+    .tab-btn.active {
+      background: #f3ba2f;
+      border-color: #f3ba2f;
+      color: #090d16;
+    }
+    .panel-card {
+      background: #101724;
+      border: 1px solid #1d283d;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0 0 8px 0;
+      line-height: 1.3;
+    }
+    .panel-desc {
+      font-size: 13px;
+      color: #9aa7b8;
+      margin: 0 0 14px 0;
+      line-height: 1.5;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #d6dee8;
+      margin-bottom: 6px;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: #090e18;
+      border: 1px solid #202c44;
+      color: #ffffff;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+    .btn-cyan {
+      width: 100%;
+      background: #22b8f0;
+      color: #061018;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-gold {
+      width: 100%;
+      background: #f3ba2f;
+      color: #090d16;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-green {
+      background: #10d990;
+      color: #06140e;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-red {
+      background: #ff4d4f;
+      color: #ffffff;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-dark {
+      background: #1a2438;
+      color: #f3ba2f;
+      border: 1px solid #2a3a58;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .sub-box {
+      background: #090e18;
+      border: 1px solid #1d283d;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #1d2940;
+      color: #f3ba2f;
+    }
+    .badge-ok {
+      background: #07291e;
+      color: #10d990;
+      border: 1px solid #0e6b4a;
+    }
+    .msg {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+
+    <!-- EN-TÊTE -->
+    <div class="header-bar">
+      <div class="brand-title">CLD_Director</div>
+      <div id="firebase-pill" class="status-pill offline">Connexion...</div>
+    </div>
+
+    <!-- 4 CARTES STATISTIQUES -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Membres inscrits</div>
+        <div id="stat-users-count" class="stat-value">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Dépôts reçus</div>
+        <div id="stat-deposits-count" class="stat-value">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Volume total déposé</div>
+        <div id="stat-volume" class="stat-value">0.00 <span id="stat-currency">USDT</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Demandes ouvertes</div>
+        <div id="stat-tickets-count" class="stat-value">0</div>
+      </div>
+    </div>
+
+    <!-- 6 BOUTONS D'ONGLETS (GRILLE 3x2) -->
+    <div class="tabs-grid">
+      <button id="tab-deposits" class="tab-btn active" onclick="switchDirectorTab('deposits')">Dépôts rapides</button>
+      <button id="tab-tickets" class="tab-btn" onclick="switchDirectorTab('tickets')">Demandes clients</button>
+      <button id="tab-members" class="tab-btn" onclick="switchDirectorTab('members')">Membres &amp; Reset</button>
+      <button id="tab-config" class="tab-btn" onclick="switchDirectorTab('config')">Réglages &amp; VIP 1–5</button>
+      <button id="tab-withdrawals" class="tab-btn" onclick="switchDirectorTab('withdrawals')">Retraits BNB</button>
+      <button id="tab-client-actions" class="tab-btn" onclick="switchDirectorTab('client-actions')">Action client</button>
+    </div>
+
+    <!-- 1. DÉPÔTS RAPIDES -->
+    <div id="view-deposits">
+      <div class="panel-card">
+        <h2 class="panel-title">Validation Rapide des Dépôts</h2>
+        <p class="panel-desc">
+          Validez en 1 clic avec le TXID soumis par le client (ou modifiez-le avant validation). Le TXID est envoyé uniquement au compte du client concerné.
+        </p>
+
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <button id="filter-pending-btn" class="btn-gold" style="padding:8px; font-size:12px;" onclick="setDepositFilter('pending')">En attente uniquement</button>
+          <button id="filter-all-btn" class="btn-dark" style="padding:8px; font-size:12px;" onclick="setDepositFilter('all')">Tous les dépôts</button>
+        </div>
+
+        <div id="deposits-list-box">Chargement des dépôts...</div>
+      </div>
+    </div>
+
+    <!-- 2. DEMANDES CLIENTS -->
+    <div id="view-tickets" class="hidden">
+      <div class="panel-card">
+        <h2 class="panel-title">Demandes &amp; Messages Clients</h2>
+        <p class="panel-desc">Répondez directement aux demandes de vos clients (dépôt, TXID, mot de passe oublié, adresse BNB, retrait ou VIP).</p>
+        <div id="tickets-list-box">Chargement des demandes...</div>
+      </div>
+    </div>
+
+    <!-- 3. MEMBRES & RESET 1 CLIC -->
+    <div id="view-members" class="hidden">
+      <div class="panel-card">
+        <h2 class="panel-title">Réinitialisation rapide du mot de passe (1 clic)</h2>
+        <p class="panel-desc">
+          Saisis l'identifiant (ou code) du compte que le client t'a donné, choisis le nouveau mot de passe (ex. 1234), puis clique sur le bouton.
+        </p>
+
+        <label for="quick-reset-target">Compte du client (identifiant ou code)</label>
+        <input type="text" id="quick-reset-target" placeholder="Ex: client_jean ou REF123" />
+
+        <label for="quick-reset-pass">Nouveau mot de passe</label>
+        <input type="text" id="quick-reset-pass" value="1234" />
+
+        <button class="btn-cyan" onclick="quickResetPassword()">Réinitialiser en 1 clic</button>
+        <div id="quick-reset-msg" class="msg"></div>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">Liste des membres</h2>
+        <p class="panel-desc">Modifiez le VIP, le solde, le mot de passe, les tâches (0/2) ou réinitialisez l'adresse BNB de retrait en 1 clic.</p>
+
+        <label for="member-search">Rechercher un membre</label>
+        <input type="text" id="member-search" placeholder="Nom, e-mail ou identifiant..." oninput="renderMembersList()" />
+
+        <div id="members-list-box">Chargement des membres...</div>
+      </div>
+    </div>
+
+    <!-- 4. CONFIGURATION & VIP 1–5 -->
+    <div id="view-config" class="hidden">
+      <div class="panel-card">
+        <h2 class="panel-title">Paramètres Généraux (Effet immédiat sur le site client)</h2>
+        <p class="panel-desc">Modifiez les réglages globaux appliqués directement sur CLD FINANCE.</p>
+
+        <label for="cfg-banner">Bannière d'annonce en haut du site</label>
+        <input type="text" id="cfg-banner" placeholder="CLD FINANCE — Dépôts rapides, retraits ou..." />
+
+        <label for="cfg-bnb-recv">Adresse de réception BEP20 (BNB Smart Chain)</label>
+        <input type="text" id="cfg-bnb-recv" placeholder="0x..." />
+
+        <label for="cfg-ref-pct">Commission Parrain (%)</label>
+        <input type="number" id="cfg-ref-pct" min="0" step="any" value="10" />
+
+        <label for="cfg-bonus-pct">Bonus Dépôt (%)</label>
+        <input type="number" id="cfg-bonus-pct" min="0" step="any" value="25" />
+
+        <label for="cfg-support-email">E-mail Service Client</label>
+        <input type="email" id="cfg-support-email" value="cldfinance79@gmail.com" />
+
+        <label for="cfg-currency">Devise affichée (ex: $ ou USDT)</label>
+        <input type="text" id="cfg-currency" value="USDT" />
+
+        <button class="btn-gold" onclick="saveGeneralSettings()">Enregistrer les Paramètres Généraux</button>
+        <div id="cfg-general-msg" class="msg"></div>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">Packs VIP 1–5 (Prix &amp; Gains modifiables)</h2>
+        <p class="panel-desc">Ajustez à tout moment le prix (dépôt minimum dès 5) et le gain journalier de chaque pack VIP.</p>
+
+        <div id="vip-1-5-container"></div>
+
+        <button class="btn-gold" onclick="saveVip1to5()">Enregistrer les Packs VIP 1–5</button>
+        <div id="cfg-vip-msg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- 5. RETRAITS BNB -->
+    <div id="view-withdrawals" class="hidden">
+      <div class="panel-card">
+        <h2 class="panel-title">Retraits BNB (BEP20)</h2>
+        <p class="panel-desc">Approuvez ou rejetez les demandes de retrait des membres.</p>
+        <div id="withdrawals-list-box">Chargement des retraits...</div>
+      </div>
+    </div>
+
+    <!-- 6. ACTION CLIENT -->
+    <div id="view-client-actions" class="hidden">
+      <div class="panel-card">
+        <h2 class="panel-title">Exécuter une Action Client à sa place</h2>
+        <p class="panel-desc">
+          Déclenchez directement un dépôt validé avec TXID, une demande de retrait BNB ou une réinitialisation des tâches quotidiennes pour n'importe quel membre.
+        </p>
+
+        <label for="act-user-select">Sélectionner le membre</label>
+        <select id="act-user-select"></select>
+
+        <div class="grid-2">
+          <div>
+            <label for="act-vip">Pack VIP</label>
+            <select id="act-vip">
+              <option value="VIP 1">VIP 1</option>
+              <option value="VIP 2">VIP 2</option>
+              <option value="VIP 3">VIP 3</option>
+              <option value="VIP 4">VIP 4</option>
+              <option value="VIP 5">VIP 5</option>
+            </select>
+          </div>
+          <div>
+            <label for="act-amount">Montant</label>
+            <input type="number" step="any" id="act-amount" value="5" />
+          </div>
+        </div>
+
+        <label for="act-txid">TXID / Adresse BNB</label>
+        <input type="text" id="act-txid" placeholder="TXID de confirmation ou adresse 0x..." />
+
+        <div class="grid-2">
+          <button class="btn-green" onclick="directorTriggerDeposit()">Valider dépôt + TXID</button>
+          <button class="btn-cyan" onclick="directorTriggerWithdraw()">Créer retrait BNB</button>
+        </div>
+        <button class="btn-dark" style="width:100%; margin-top:8px;" onclick="directorResetTasksZero()">Réinitialiser tâches du jour (0 / 2)</button>
+        <div id="act-client-msg" class="msg"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDVe1z4fWlMoQojfsnoMFOFhytkGefZuLo",
+      authDomain: "cld-finance-3a89f.firebaseapp.com",
+      databaseURL: "https://cld-finance-3a89f-default-rtdb.firebaseio.com",
+      projectId: "cld-finance-3a89f",
+      storageBucket: "cld-finance-3a89f.firebasestorage.app",
+      messagingSenderId: "830225739365",
+      appId: "1:830225739365:web:607cffe7316de83053e08c",
+      measurementId: "G-09H9GJWKXV"
+    };
+
+    let db = null;
+    const pillEl = document.getElementById("firebase-pill");
+
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(FIREBASE_CONFIG);
+      }
+      db = firebase.database();
+      pillEl.textContent = "Connecté à Firebase";
+      pillEl.classList.remove("offline");
+
+      db.ref(".info/connected").on("value", (snap) => {
+        if (snap.val() === true) {
+          pillEl.textContent = "Connecté à Firebase";
+          pillEl.classList.remove("offline");
+        } else {
+          pillEl.textContent = "Hors ligne";
+          pillEl.classList.add("offline");
+        }
+      });
+    } catch (err) {
+      pillEl.textContent = "Erreur Firebase";
+      pillEl.classList.add("offline");
+    }
+
+    let settingsData = {
+      bannerText: "CLD FINANCE — Dépôts rapides, retraits actifs 24h/24",
+      platformBnbAddress: "0xfb8d8832df16fea52f0ddac2d14aa86c7489017c",
+      referralPercent: 10,
+      depositBonusPercent: 25,
+      supportEmail: "cldfinance79@gmail.com",
+      currency: "USDT",
+      vipPlans: {
+        "VIP 1": { minDeposit: 5, dailyGain: 0.75 },
+        "VIP 2": { minDeposit: 15, dailyGain: 2.25 },
+        "VIP 3": { minDeposit: 50, dailyGain: 8.00 },
+        "VIP 4": { minDeposit: 150, dailyGain: 25.00 },
+        "VIP 5": { minDeposit: 300, dailyGain: 55.00 }
+      }
+    };
+
+    let usersMap = {};
+    let depositsMap = {};
+    let withdrawalsMap = {};
+    let ticketsMap = {};
+    let depositFilterMode = "pending";
+
+    function switchDirectorTab(tabName) {
+      const map = {
+        deposits: "view-deposits",
+        tickets: "view-tickets",
+        members: "view-members",
+        config: "view-config",
+        withdrawals: "view-withdrawals",
+        "client-actions": "view-client-actions"
+      };
+      Object.keys(map).forEach((k) => {
+        document.getElementById(map[k]).classList.toggle("hidden", k !== tabName);
+        document.getElementById("tab-" + k).classList.toggle("active", k === tabName);
+      });
+    }
+
+    function setDepositFilter(mode) {
+      depositFilterMode = mode;
+      document.getElementById("filter-pending-btn").className = mode === "pending" ? "btn-gold" : "btn-dark";
+      document.getElementById("filter-pending-btn").style.padding = "8px";
+      document.getElementById("filter-pending-btn").style.fontSize = "12px";
+
+      document.getElementById("filter-all-btn").className = mode === "all" ? "btn-gold" : "btn-dark";
+      document.getElementById("filter-all-btn").style.padding = "8px";
+      document.getElementById("filter-all-btn").style.fontSize = "12px";
+      renderDepositsList();
+    }
+
+    function updateStats() {
+      const usersArr = Object.values(usersMap || {});
+      const depositsArr = Object.values(depositsMap || {});
+      const ticketsArr = Object.values(ticketsMap || {});
+      const openTickets = ticketsArr.filter((t) => t.status !== "resolved").length;
+      const totalVol = depositsArr.reduce((acc, d) => acc + (parseFloat(d.amount) || 0), 0);
+      const curr = settingsData.currency || "USDT";
+
+      document.getElementById("stat-users-count").textContent = String(usersArr.length);
+      document.getElementById("stat-deposits-count").textContent = String(depositsArr.length);
+      document.getElementById("stat-volume").innerHTML = `${totalVol.toFixed(2)} <span>${curr}</span>`;
+      document.getElementById("stat-tickets-count").textContent = String(openTickets);
+    }
+
+    function renderConfigForms() {
+      document.getElementById("cfg-banner").value = settingsData.bannerText || "";
+      document.getElementById("cfg-bnb-recv").value = settingsData.platformBnbAddress || "";
+      document.getElementById("cfg-ref-pct").value = settingsData.referralPercent ?? 10;
+      document.getElementById("cfg-bonus-pct").value = settingsData.depositBonusPercent ?? 25;
+      document.getElementById("cfg-support-email").value = settingsData.supportEmail || "cldfinance79@gmail.com";
+      document.getElementById("cfg-currency").value = settingsData.currency || "USDT";
+
+      const vipBox = document.getElementById("vip-1-5-container");
+      const vipNames = ["VIP 1", "VIP 2", "VIP 3", "VIP 4", "VIP 5"];
+      const plans = settingsData.vipPlans || {};
+
+      vipBox.innerHTML = vipNames.map((vName, i) => {
+        const p = plans[vName] || { minDeposit: 5 * (i + 1), dailyGain: 1 };
+        return `
+          <div class="sub-box">
+            <div style="font-weight:800; color:#f3ba2f; margin-bottom:8px;">${vName}</div>
+            <div class="grid-2">
+              <div>
+                <label>Prix / Dépôt min (≥ 5)</label>
+                <input type="number" min="5" step="any" id="vip-min-${i + 1}" value="${Math.max(5, Number(p.minDeposit || 5))}" />
+              </div>
+              <div>
+                <label>Gain journalier</label>
+                <input type="number" min="0" step="any" id="vip-gain-${i + 1}" value="${Number(p.dailyGain || 0)}" />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function saveGeneralSettings() {
+      const msg = document.getElementById("cfg-general-msg");
+      if (!db) return;
+
+      const payload = {
+        bannerText: document.getElementById("cfg-banner").value.trim(),
+        platformBnbAddress: document.getElementById("cfg-bnb-recv").value.trim(),
+        referralPercent: parseFloat(document.getElementById("cfg-ref-pct").value) || 0,
+        depositBonusPercent: parseFloat(document.getElementById("cfg-bonus-pct").value) || 0,
+        supportEmail: document.getElementById("cfg-support-email").value.trim() || "cldfinance79@gmail.com",
+        currency: document.getElementById("cfg-currency").value.trim() || "USDT"
+      };
+
+      db.ref("settings/platform").update(payload).then(() => {
+        msg.style.color = "#10d990";
+        msg.textContent = "Paramètres généraux enregistrés et synchronisés.";
+        updateStats();
+      }).catch((e) => {
+        msg.style.color = "#ff6b6b";
+        msg.textContent = "Erreur : " + e.message;
+      });
+    }
+
+    function saveVip1to5() {
+      const msg = document.getElementById("cfg-vip-msg");
+      if (!db) return;
+
+      const vipPlans = {};
+      for (let i = 1; i <= 5; i++) {
+        vipPlans["VIP " + i] = {
+          minDeposit: Math.max(5, parseFloat(document.getElementById("vip-min-" + i).value) || 5),
+          dailyGain: parseFloat(document.getElementById("vip-gain-" + i).value) || 0
+        };
+      }
+
+      db.ref("settings/platform/vipPlans").set(vipPlans).then(() => {
+        msg.style.color = "#10d990";
+        msg.textContent = "Packs VIP 1–5 mis à jour en temps réel.";
+      }).catch((e) => {
+        msg.style.color = "#ff6b6b";
+        msg.textContent = "Erreur : " + e.message;
+      });
+    }
+
+    function findUserKeyByIdentifier(identifier) {
+      const clean = identifier.trim().toLowerCase();
+      if (!clean) return null;
+      if (usersMap[identifier.trim()]) return identifier.trim();
+
+      for (const [uid, u] of Object.entries(usersMap || {})) {
+        if (
+          uid.toLowerCase() === clean ||
+          (u.email && u.email.toLowerCase() === clean) ||
+          (u.referralCode && u.referralCode.toLowerCase() === clean) ||
+          (u.name && u.name.toLowerCase() === clean)
+        ) {
+          return uid;
+        }
+      }
+      return null;
+    }
+
+    function quickResetPassword() {
+      const target = document.getElementById("quick-reset-target").value.trim();
+      const newPass = document.getElementById("quick-reset-pass").value.trim();
+      const msg = document.getElementById("quick-reset-msg");
+
+      if (!target || newPass.length < 4) {
+        msg.style.color = "#ff6b6b";
+        msg.textContent = "Indiquez un compte valide et un mot de passe (min. 4 caractères).";
+        return;
+      }
+      if (!db) return;
+
+      const matchedUid = findUserKeyByIdentifier(target) || target;
+      db.ref("users/" + matchedUid).update({ password: newPass }).then(() => {
+        msg.style.color = "#10d990";
+        msg.textContent = `Mot de passe réinitialisé pour ${matchedUid} (${newPass}).`;
+      });
+    }
+
+    function resetMemberBnbAddress(uid) {
+      if (!db || !uid) return;
+      const inputEl = document.getElementById("m-bnb-" + uid);
+      if (inputEl) inputEl.value = "";
+      db.ref("users/" + uid).update({ defaultBnb: "" }).then(() => {
+        alert(`Adresse BNB de retrait réinitialisée pour ${uid}.`);
+      });
+    }
+
+    function saveMemberRow(uid) {
+      if (!db || !uid) return;
+      const vip = document.getElementById("m-vip-" + uid).value;
+      const balance = parseFloat(document.getElementById("m-bal-" + uid).value) || 0;
+      const pass = document.getElementById("m-pass-" + uid).value.trim();
+      const bnb = document.getElementById("m-bnb-" + uid).value.trim();
+      const txid = document.getElementById("m-txid-" + uid).value.trim();
+
+      if (pass && pass.length < 4) {
+        alert("Le mot de passe doit contenir au moins 4 caractères.");
+        return;
+      }
+      if (bnb && (!bnb.startsWith("0x") || bnb.length < 20)) {
+        alert("Adresse BNB invalide (doit commencer par 0x).");
+        return;
+      }
+
+      const updates = {
+        vip,
+        balance: Number(balance.toFixed(2)),
+        defaultBnb: bnb,
+        confirmTxid: txid,
+        depositConfirmed: Boolean(vip && txid.length >= 4),
+        depositStatus: Boolean(vip && txid.length >= 4) ? "confirmed" : "pending"
+      };
+      if (pass) updates.password = pass;
+
+      db.ref("users/" + uid).update(updates).then(() => {
+        alert("Membre mis à jour.");
+      });
+    }
+
+    function renderMembersList() {
+      const box = document.getElementById("members-list-box");
+      const q = (document.getElementById("member-search")?.value || "").trim().toLowerCase();
+      const entries = Object.entries(usersMap || {}).filter(([uid, u]) => {
+        if (!q) return true;
+        return (
+          uid.toLowerCase().includes(q) ||
+          (u.name || "").toLowerCase().includes(q) ||
+          (u.email || "").toLowerCase().includes(q)
+        );
+      });
+
+      const selectEl = document.getElementById("act-user-select");
+      if (selectEl) {
+        const prevVal = selectEl.value;
+        selectEl.innerHTML = Object.entries(usersMap || {}).map(([uid, u]) =>
+          `<option value="${uid}">${u.name || uid} (${u.email || uid})</option>`
+        ).join("");
+        if (prevVal && usersMap[prevVal]) selectEl.value = prevVal;
+      }
+
+      if (!entries.length) {
+        box.innerHTML = `<p class="panel-desc" style="margin-bottom:0;">Aucun membre trouvé.</p>`;
+        return;
+      }
+
+      const vipOpts = ["", "VIP 1", "VIP 2", "VIP 3", "VIP 4", "VIP 5"];
+
+      box.innerHTML = entries.map(([uid, u]) => {
+        const optsHtml = vipOpts.map((v) =>
+          `<option value="${v}" ${(u.vip || "") === v ? "selected" : ""}>${v || "Aucun VIP"}</option>`
+        ).join("");
+
+        return `
+          <div class="sub-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong>${u.name || "Membre"} (${u.email || ""})</strong>
+              <span class="badge ${u.depositConfirmed ? "badge-ok" : ""}">${u.vip || "Sans VIP"}</span>
+            </div>
+            <div style="font-size:12px; color:#9aa7b8; margin-bottom:8px;">ID : <code>${uid}</code></div>
+
+            <div class="grid-2">
+              <div>
+                <label>Pack VIP</label>
+                <select id="m-vip-${uid}">${optsHtml}</select>
+              </div>
+              <div>
+                <label>Solde</label>
+                <input type="number" step="any" id="m-bal-${uid}" value="${Number(u.balance || 0).toFixed(2)}" />
+              </div>
+            </div>
+
+            <label>Mot de passe client</label>
+            <input type="text" id="m-pass-${uid}" value="${u.password || ""}" placeholder="Mot de passe" />
+
+            <label>Adresse BNB de retrait du client</label>
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+              <input type="text" id="m-bnb-${uid}" style="margin-bottom:0; flex:1;" value="${u.defaultBnb || ""}" placeholder="0x..." />
+              <button class="btn-dark" onclick="resetMemberBnbAddress('${uid}')">Reset BNB</button>
+            </div>
+
+            <label>TXID confirmé du client</label>
+            <input type="text" id="m-txid-${uid}" value="${u.confirmTxid || ""}" placeholder="TXID" />
+
+            <button class="btn-gold" onclick="saveMemberRow('${uid}')">Enregistrer ce membre</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function executeDepositConfirmation(depId) {
+      if (!db) return;
+      const d = depositsMap[depId];
+      if (!d || !d.uid) return;
+
+      const inputTxid = document.getElementById("dep-txid-" + depId)?.value.trim() || "";
+      const confirmTxid = inputTxid || d.clientTxid || ("TXID_" + Date.now());
+      const vipLevel = document.getElementById("dep-vip-" + depId)?.value || d.vipRequested || "VIP 1";
+      const defaultTotal = Number(d.totalWithBonus || d.amount || 0);
+      const creditAmount = parseFloat(document.getElementById("dep-amt-" + depId)?.value) || defaultTotal;
+
+      db.ref("deposits/" + depId).update({
+        status: "confirmed",
+        confirmTxid,
+        vipActivated: vipLevel,
+        creditedAmount: creditAmount,
+        confirmedAt: Date.now()
+      });
+
+      const userRef = db.ref("users/" + d.uid);
+      userRef.get().then((snap) => {
+        const prevBal = snap.exists() ? (parseFloat(snap.val().balance) || 0) : 0;
+        const nextBal = Number((prevBal + creditAmount).toFixed(2));
+        userRef.update({
+          vip: vipLevel,
+          depositConfirmed: true,
+          depositStatus: "confirmed",
+          confirmTxid,
+          balance: nextBal
+        });
+        userRef.child("confirmedTxids/" + depId).set({
+          depositId: depId,
+          txid: confirmTxid,
+          vip: vipLevel,
+          creditedAmount: creditAmount,
+          confirmedAt: Date.now()
+        });
+      });
+
+      if (d.referredBy && !d.referralPaid) {
+        const refComm = Number(d.referralCommissionEstimate || 0);
+        if (refComm > 0) {
+          const pRef = db.ref("users/" + d.referredBy);
+          pRef.get().then((pSnap) => {
+            if (pSnap.exists()) {
+              const pData = pSnap.val();
+              pRef.update({
+                balance: Number(((parseFloat(pData.balance) || 0) + refComm).toFixed(2)),
+                referralEarnings: Number(((parseFloat(pData.referralEarnings) || 0) + refComm).toFixed(2))
+              });
+              db.ref("deposits/" + depId).update({ referralPaid: true });
+            }
+          });
+        }
+      }
+
+      alert(`Dépôt validé et TXID envoyé au compte de ${d.memberName || d.uid} !`);
+    }
+
+    function rejectDepositItem(depId) {
+      if (!db) return;
+      db.ref("deposits/" + depId).update({ status: "rejected", rejectedAt: Date.now() });
+    }
+
+    function renderDepositsList() {
+      const box = document.getElementById("deposits-list-box");
+      const entries = Object.entries(depositsMap || {}).filter(([, d]) =>
+        depositFilterMode === "all" ? true : d.status !== "confirmed"
+      ).reverse();
+
+      if (!entries.length) {
+        box.innerHTML = `<p class="panel-desc" style="margin-bottom:0;">Aucun dépôt à afficher dans ce filtre.</p>`;
+        return;
+      }
+
+      const vipOpts = ["VIP 1", "VIP 2", "VIP 3", "VIP 4", "VIP 5"];
+
+      box.innerHTML = entries.map(([depId, d]) => {
+        const isConf = d.status === "confirmed";
+        const totalEst = Number(d.totalWithBonus || d.amount || 0).toFixed(2);
+        const txidVal = d.confirmTxid || d.clientTxid || "";
+
+        const optsHtml = vipOpts.map((v) =>
+          `<option value="${v}" ${(d.vipRequested === v) ? "selected" : ""}>${v}</option>`
+        ).join("");
+
+        return `
+          <div class="sub-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong>${d.memberName || "Membre"} (${d.memberEmail || ""})</strong>
+              <span class="badge ${isConf ? "badge-ok" : ""}">${isConf ? "Confirmé" : "En attente"}</span>
+            </div>
+            <div style="font-size:12px; color:#9aa7b8;">Client : <code>${d.uid || ""}</code> | Dépôt : <strong>${Number(d.amount || 0).toFixed(2)}</strong> (Total : <strong>${totalEst}</strong>)</div>
+            <div style="font-size:12px; color:#f3ba2f; word-break:break-all; margin:6px 0;">TXID client : ${d.clientTxid || "—"}</div>
+
+            <button class="btn-cyan" style="margin-bottom:10px;" onclick="executeDepositConfirmation('${depId}')">⚡ Validation rapide (1 clic)</button>
+
+            <label>TXID de confirmation personnalisé</label>
+            <input type="text" id="dep-txid-${depId}" value="${txidVal}" placeholder="TXID..." />
+
+            <div class="grid-2">
+              <div>
+                <label>VIP à activer</label>
+                <select id="dep-vip-${depId}">${optsHtml}</select>
+              </div>
+              <div>
+                <label>Montant à créditer</label>
+                <input type="number" step="any" id="dep-amt-${depId}" value="${totalEst}" />
+              </div>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+              <button class="btn-green" style="flex:1;" onclick="executeDepositConfirmation('${depId}')">Valider &amp; Envoyer TXID</button>
+              <button class="btn-red" onclick="rejectDepositItem('${depId}')">Rejeter</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function replyToTicket(ticketId) {
+      if (!db) return;
+      const replyText = document.getElementById("ticket-reply-" + ticketId)?.value.trim() || "";
+      if (!replyText) {
+        alert("Écrivez une réponse avant d'envoyer.");
+        return;
+      }
+
+      db.ref("support_tickets/" + ticketId).update({
+        directorReply: replyText,
+        repliedAt: Date.now(),
+        status: "resolved"
+      }).then(() => {
+        alert("Réponse envoyée au client !");
+      });
+    }
+
+    function renderTicketsList() {
+      const box = document.getElementById("tickets-list-box");
+      const entries = Object.entries(ticketsMap || {}).reverse();
+
+      if (!entries.length) {
+        box.innerHTML = `<p class="panel-desc" style="margin-bottom:0;">Aucune demande client pour le moment.</p>`;
+        return;
+      }
+
+      box.innerHTML = entries.map(([tId, t]) => {
+        const isResolved = t.status === "resolved";
+        return `
+          <div class="sub-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong>${t.memberName || "Membre"} (${t.memberEmail || ""})</strong>
+              <span class="badge ${isResolved ? "badge-ok" : ""}">${isResolved ? "Répondu" : "En attente"}</span>
+            </div>
+            <div style="font-size:12px; color:#f3ba2f; margin-bottom:4px;">Sujet : ${t.subject || "Demande générale"}</div>
+            <div style="font-size:13px; margin-bottom:8px;">${t.message || ""}</div>
+
+            <label>Votre réponse au client</label>
+            <textarea id="ticket-reply-${tId}" placeholder="Rédigez votre réponse...">${t.directorReply || ""}</textarea>
+            <button class="btn-green" style="width:100%;" onclick="replyToTicket('${tId}')">Envoyer la réponse</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function approveWithdrawalItem(wId) {
+      if (!db) return;
+      const w = withdrawalsMap[wId];
+      if (!w) return;
+      db.ref("withdrawals/" + wId).update({ status: "approved", processedAt: Date.now() });
+      if (w.uid) {
+        const uRef = db.ref("users/" + w.uid);
+        uRef.get().then((snap) => {
+          if (snap.exists()) {
+            const bal = parseFloat(snap.val().balance) || 0;
+            const amt = parseFloat(w.amount) || 0;
+            uRef.update({ balance: Math.max(0, Number((bal - amt).toFixed(2))) });
+          }
+        });
+      }
+    }
+
+    function rejectWithdrawalItem(wId) {
+      if (!db) return;
+      db.ref("withdrawals/" + wId).update({ status: "rejected", processedAt: Date.now() });
+    }
+
+    function renderWithdrawalsList() {
+      const box = document.getElementById("withdrawals-list-box");
+      const entries = Object.entries(withdrawalsMap || {}).reverse();
+      if (!entries.length) {
+        box.innerHTML = `<p class="panel-desc" style="margin-bottom:0;">Aucune demande de retrait.</p>`;
+        return;
+      }
+
+      box.innerHTML = entries.map(([wId, w]) => {
+        const isDone = w.status === "approved" || w.status === "rejected";
+        return `
+          <div class="sub-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong>${w.memberName || "Membre"} (${w.memberEmail || ""})</strong>
+              <span class="badge ${w.status === "approved" ? "badge-ok" : ""}">${w.status || "En attente"}</span>
+            </div>
+            <div style="font-size:13px;">Montant : <strong style="color:#10d990;">${Number(w.amount || 0).toFixed(2)}</strong></div>
+            <div style="font-size:12px; color:#f3ba2f; word-break:break-all; margin:4px 0;">BNB BEP20 : ${w.bnbAddress || ""}</div>
+            ${!isDone ? `
+              <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="btn-green" style="flex:1;" onclick="approveWithdrawalItem('${wId}')">Approuver</button>
+                <button class="btn-red" onclick="rejectWithdrawalItem('${wId}')">Rejeter</button>
+              </div>
+            ` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function directorTriggerDeposit() {
+      const msg = document.getElementById("act-client-msg");
+      if (!db) return;
+      const uid = document.getElementById("act-user-select").value;
+      const vip = document.getElementById("act-vip").value;
+      const amt = parseFloat(document.getElementById("act-amount").value) || 0;
+      const txid = document.getElementById("act-txid").value.trim() || ("TXID_" + Date.now());
+      const u = usersMap[uid];
+
+      if (!uid || !u || amt < 5) {
+        msg.style.color = "#ff6b6b";
+        msg.textContent = "Sélectionnez un membre et un montant ≥ 5.";
+        return;
+      }
+
+      const depRef = db.ref("deposits").push({
+        uid,
+        memberName: u.name || uid,
+        memberEmail: u.email || "",
+        vipRequested: vip,
+        vipActivated: vip,
+        amount: amt,
+        creditedAmount: amt,
+        clientTxid: txid,
+        confirmTxid: txid,
+        status: "confirmed",
+        confirmedAt: Date.now(),
+        createdAt: Date.now()
+      });
+
+      const prevBal = parseFloat(u.balance) || 0;
+      db.ref("users/" + uid).update({
+        vip,
+        depositConfirmed: true,
+        depositStatus: "confirmed",
+        confirmTxid: txid,
+        balance: Number((prevBal + amt).toFixed(2))
+      });
+      db.ref("users/" + uid + "/confirmedTxids/" + depRef.key).set({
+        depositId: depRef.key,
+        txid,
+        vip,
+        creditedAmount: amt,
+        confirmedAt: Date.now()
+      });
+
+      msg.style.color = "#10d990";
+      msg.textContent = `Dépôt validé (+${amt.toFixed(2)}) et TXID envoyé à ${u.name || uid}.`;
+    }
+
+    function directorTriggerWithdraw() {
+      const msg = document.getElementById("act-client-msg");
+      if (!db) return;
+      const uid = document.getElementById("act-user-select").value;
+      const amt = parseFloat(document.getElementById("act-amount").value) || 0;
+      const addr = document.getElementById("act-txid").value.trim() || (usersMap[uid]?.defaultBnb || "");
+      const u = usersMap[uid];
+
+      if (!uid || !u || amt <= 0 || !addr.startsWith("0x")) {
+        msg.style.color = "#ff6b6b";
+        msg.textContent = "Vérifiez le membre, le montant et l'adresse BNB (0x...).";
+        return;
+      }
+
+      db.ref("withdrawals").push({
+        uid,
+        memberName: u.name || uid,
+        memberEmail: u.email || "",
+        network: "BNB_BEP20",
+        bnbAddress: addr,
+        amount: amt,
+        status: "pending",
+        createdAt: Date.now()
+      });
+
+      msg.style.color = "#10d990";
+      msg.textContent = `Demande de retrait de ${amt.toFixed(2)} créée pour ${u.name || uid}.`;
+    }
+
+    function directorResetTasksZero() {
+      const msg = document.getElementById("act-client-msg");
+      if (!db) return;
+      const uid = document.getElementById("act-user-select").value;
+      if (!uid) return;
+      db.ref("users/" + uid).update({ tasksDone: 0 }).then(() => {
+        msg.style.color = "#10d990";
+        msg.textContent = `Tâches quotidiennes réinitialisées à 0/2 pour ${uid}.`;
+      });
+    }
+
+    function attachFirebaseListeners() {
+      if (!db) return;
+
+      db.ref("settings/platform").on("value", (snap) => {
+        if (snap.exists()) {
+          settingsData = {
+            ...settingsData,
+            ...snap.val(),
+            vipPlans: snap.val().vipPlans || settingsData.vipPlans
+          };
+          renderConfigForms();
+          updateStats();
+        }
+      });
+
+      db.ref("users").on("value", (snap) => {
+        usersMap = snap.exists() ? snap.val() : {};
+        renderMembersList();
+        updateStats();
+      });
+
+      db.ref("deposits").on("value", (snap) => {
+        depositsMap = snap.exists() ? snap.val() : {};
+        renderDepositsList();
+        updateStats();
+      });
+
+      db.ref("withdrawals").on("value", (snap) => {
+        withdrawalsMap = snap.exists() ? snap.val() : {};
+        renderWithdrawalsList();
+      });
+
+      db.ref("support_tickets").on("value", (snap) => {
+        ticketsMap = snap.exists() ? snap.val() : {};
+        renderTicketsList();
+        updateStats();
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderConfigForms();
+      renderMembersList();
+      renderDepositsList();
+      renderWithdrawalsList();
+      renderTicketsList();
+      updateStats();
+      attachFirebaseListeners();
+    });
+  </script>
+</body>
+</html>
